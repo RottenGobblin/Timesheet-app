@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** project scaffold and dosing engine are done and tested. Screens, storage and reminders come next.
+> **Status:** dosing engine, local storage and the pool profile screen are done. Test entry, the dose plan, history and reminders come next.
 
 ## Setup
 
@@ -21,7 +21,10 @@ npm install
 npm start          # Expo dev server, scan the QR code with Expo Go
 npm run android    # open on an Android device or emulator
 npm run ios        # open on an iOS simulator (macOS only)
+npm run web        # quick check in a browser (storage uses localStorage there)
 ```
+
+On first launch the app opens the pool profile so it has a volume and product strengths to dose against.
 
 ## Testing and checks
 
@@ -36,11 +39,30 @@ npm run check      # all three
 
 ```
 src/
-  app/        Expo Router routes (placeholder Home screen for now)
-  engine/     Dosing engine: pure TypeScript, no React or Expo imports
+  app/         Expo Router routes: index (placeholder Home), pool (pool profile)
+  components/  Shared UI: pill button, segmented control, stepper, number field, card
+  engine/      Dosing engine: pure TypeScript, no React or Expo imports
+  lib/         Pure helpers: volume calculator, number parsing, pool form logic
+  state/       React context for the saved pool
+  storage/     Local storage: pool profile and test history repositories
+  theme.ts     Palette, fonts, radii and spacing
 ```
 
 ESLint blocks React and Expo imports inside `src/engine/`, so the engine stays reusable on web or a backend later.
+
+## Storage
+
+Everything is stored on the device with AsyncStorage. There is no backend in v1.
+
+- `src/storage/kv.ts` defines a small key-value interface. The app uses AsyncStorage (`asyncStore.ts`); tests use an in-memory store, so storage logic is tested without native code.
+- Each record is saved as `{ v, data }` so the format can change later with a migration instead of wiping history.
+- **Pool profile** (`poolRepo.ts`): validated with the engine before saving. Missing product strengths in old saves fall back to defaults.
+- **Test history** (`testsRepo.ts`): add, list (newest first), edit notes, delete. Readings are validated before saving. Unreadable entries are skipped rather than losing the rest.
+- Corrupt or unreadable data never crashes the app: it's treated as "nothing saved".
+
+## Pool profile
+
+The pool screen sets volume, sanitiser (liquid, granular or salt), indoor or outdoor, and product strengths. Only the strengths that matter are shown (for example, granular strength for granular pools, dry acid purity if you use dry acid). Owners who don't know their volume can work it out from the size of a rectangle, round or oval pool, with shallow and deep end depths.
 
 ## Dosing engine
 

@@ -1,17 +1,43 @@
+import { Redirect, router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Placeholder until the Home screen is built. The dosing engine lives in src/engine.
-export default function Index() {
+import { Card } from '../components/Card';
+import { PillButton } from '../components/PillButton';
+import { formatLitres } from '../lib/number';
+import { usePool } from '../state/PoolProvider';
+import { colours, fonts, space } from '../theme';
+
+const SANITISER_LABEL = { liquid: 'Liquid chlorine', granular: 'Granular chlorine', salt: 'Salt chlorinator' } as const;
+
+// Placeholder Home until the water health card is built.
+export default function Home() {
+  const { pool, loading } = usePool();
+
+  if (loading) return null;
+  if (!pool) return <Redirect href="/pool" />;
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.screen}>
       <Text style={styles.title}>Clearly</Text>
-      <Text style={styles.body}>Dosing engine is in. Screens are next.</Text>
-    </View>
+      <Card title={pool.name || 'Your pool'}>
+        <Text style={styles.line}>{formatLitres(pool.volumeLitres)} L</Text>
+        <Text style={styles.sub}>
+          {SANITISER_LABEL[pool.sanitiser]}, {pool.location}
+        </Text>
+        <PillButton label="Edit pool" variant="secondary" onPress={() => router.push('/pool')} />
+      </Card>
+      <View style={styles.note}>
+        <Text style={styles.sub}>Water testing is coming next.</Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FAFAF7', padding: 24 },
-  title: { fontSize: 32, fontWeight: '800', color: '#1A9FE0' },
-  body: { marginTop: 8, fontSize: 16, color: '#14213D', textAlign: 'center' },
+  screen: { flex: 1, padding: space.md, gap: space.lg, backgroundColor: colours.background },
+  title: { fontFamily: fonts.heading, fontSize: 36, color: colours.primary, marginTop: space.md },
+  line: { fontFamily: fonts.bodySemi, fontSize: 28, color: colours.ink },
+  sub: { fontFamily: fonts.body, fontSize: 16, color: colours.inkMuted },
+  note: { alignItems: 'center' },
 });
