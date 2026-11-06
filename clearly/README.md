@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** dosing engine, local storage, the pool profile, the Test screen and the Plan screen (with dose follow-up reminders) are done. History, Settings, the full Home card and the scheduled test reminders come next.
+> **Status:** dosing engine, local storage, the pool profile, Test, Plan (with dose follow-up reminders) and History are done. Settings, the full Home card and the scheduled test reminders come next.
 
 ## Setup
 
@@ -39,7 +39,7 @@ npm run check      # all three
 
 ```
 src/
-  app/         Expo Router routes: index (interim Home), pool, test, plan
+  app/         Expo Router routes: index (interim Home), pool, test, plan, history
   notifications/  Local notification wrapper (no-op on web or without permission)
   components/  Shared UI: pill button, segmented control, stepper, number field, card
   engine/      Dosing engine: pure TypeScript, no React or Expo imports
@@ -90,6 +90,13 @@ Ticking a step that has a wait schedules a local notification for when it ends, 
 - Nothing fires in quiet hours (9 pm to 7 am for now; adjustable once Settings is built). A reminder that would land then moves to 7 am.
 - Undoing a tick, finishing the plan or starting a new test cancels the pending reminder.
 - Permission is only asked the first time a reminder is needed. Notifications don't run on web.
+
+## History screen
+
+- Trend lines for free chlorine and pH, with alkalinity and stabiliser toggleable. Pick 30 days, 90 days or all.
+- Each chart shades the ideal range in lime and marks readings outside it with coral dots. Points are spaced by date, so gaps between tests show as gaps. The chlorine band uses the most recent stabiliser reading.
+- Charts are drawn with `react-native-svg` (bundled in Expo Go), no chart library.
+- Past tests, newest first: date, a status pill, the four readings (out-of-range ones in coral or red) and notes. Tap a test to see its plan (latest test only), add or edit its note, or delete it with a confirm step. Deleting a test also cancels any reminder its plan had pending.
 
 ## Dosing engine
 

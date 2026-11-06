@@ -67,6 +67,7 @@ export default function Home() {
         )}
 
         <PillButton label="Test water" onPress={() => router.push('/test')} />
+        {latest ? <PillButton label="History" variant="secondary" onPress={() => router.push('/history')} /> : null}
 
         <Card title={pool.name || 'Your pool'}>
           <Text style={styles.sub}>

@@ -2,13 +2,25 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import type { Readings } from '../engine';
 import { asyncStore } from '../storage/asyncStore';
-import { addTest, listTests, type KeyValueStore, type TestRecord } from '../storage';
+import { cancelReminder } from '../notifications';
+import {
+  addTest,
+  deleteTest,
+  listTests,
+  loadAnyProgress,
+  saveProgress,
+  updateTestNotes,
+  type KeyValueStore,
+  type TestRecord,
+} from '../storage';
 
 interface TestsContextValue {
   /** Saved tests, newest first. */
   tests: TestRecord[];
   loading: boolean;
   add(input: { readings: Readings; notes?: string }): Promise<TestRecord>;
+  updateNotes(id: string, notes: string): Promise<void>;
+  remove(id: string): Promise<void>;
 }
 
 const TestsContext = createContext<TestsContextValue | null>(null);
@@ -40,7 +52,32 @@ export function TestsProvider({ children, store = asyncStore }: { children: Reac
     [store],
   );
 
-  const value = useMemo(() => ({ tests, loading, add }), [tests, loading, add]);
+  const updateNotes = useCallback(
+    async (id: string, notes: string) => {
+      await updateTestNotes(store, id, notes);
+      setTests(await listTests(store));
+    },
+    [store],
+  );
+
+  const remove = useCallback(
+    async (id: string) => {
+      await deleteTest(store, id);
+      // If this test's plan has a reminder pending, it no longer applies.
+      const progress = await loadAnyProgress(store).catch(() => null);
+      if (progress?.testId === id && progress.reminderId) {
+        await cancelReminder(progress.reminderId);
+        await saveProgress(store, { testId: id, ticks: progress.ticks }).catch(() => undefined);
+      }
+      setTests(await listTests(store));
+    },
+    [store],
+  );
+
+  const value = useMemo(
+    () => ({ tests, loading, add, updateNotes, remove }),
+    [tests, loading, add, updateNotes, remove],
+  );
   return <TestsContext.Provider value={value}>{children}</TestsContext.Provider>;
 }
 
