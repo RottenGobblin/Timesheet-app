@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** dosing engine, local storage and the pool profile screen are done. Test entry, the dose plan, history and reminders come next.
+> **Status:** dosing engine, local storage, the pool profile and the Test screen are done. The dose plan screen, history, the full Home card and reminders come next.
 
 ## Setup
 
@@ -39,11 +39,11 @@ npm run check      # all three
 
 ```
 src/
-  app/         Expo Router routes: index (placeholder Home), pool (pool profile)
+  app/         Expo Router routes: index (interim Home), pool (pool profile), test (enter a test)
   components/  Shared UI: pill button, segmented control, stepper, number field, card
   engine/      Dosing engine: pure TypeScript, no React or Expo imports
   lib/         Pure helpers: volume calculator, number parsing, pool form logic
-  state/       React context for the saved pool
+  state/       React context for the saved pool and test history
   storage/     Local storage: pool profile and test history repositories
   theme.ts     Palette, fonts, radii and spacing
 ```
@@ -63,6 +63,14 @@ Everything is stored on the device with AsyncStorage. There is no backend in v1.
 ## Pool profile
 
 The pool screen sets volume, sanitiser (liquid, granular or salt), indoor or outdoor, and product strengths. Only the strengths that matter are shown (for example, granular strength for granular pools, dry acid purity if you use dry acid). Owners who don't know their volume can work it out from the size of a rectangle, round or oval pool, with shallow and deep end depths.
+
+## Test screen
+
+- Each reading starts as "Not tested". Tap **Add reading** to start it at the last test's value (or the ideal on the first test).
+- Big − / + buttons step by test-kit resolution (FC 0.5, pH 0.1, TA and CYA 10). Hold to keep stepping, or tap the number to type it.
+- A low / ideal / high bar shows where each value sits, with a short line underneath. The chlorine bar moves with the stabiliser reading. Lime is ideal, coral is adjust, and deep red is kept for act-now and safety cases (FC above 10, very low FC, pH below 7.0 or above 8.0), which use plain wording.
+- Optional notes, a "Scan strip" placeholder marked coming soon, and a quick ripple on save.
+- The interim Home shows the latest result (Crystal clear / Needs a tweak / Act now) and the readings.
 
 ## Dosing engine
 

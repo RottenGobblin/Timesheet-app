@@ -8,6 +8,9 @@ export const colours = {
   success: '#B6E84A',
   successInk: '#3F5A0B',
   warning: '#FF7A59',
+  /** Coral is too light for text on white; use this for coral messages. */
+  warningInk: '#B23F1E',
+  warningSoft: '#FFD3C7',
   /** Reserved for "act now" and safety warnings only. */
   danger: '#C62828',
   dangerSoft: '#FDECEC',

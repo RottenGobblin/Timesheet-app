@@ -13,7 +13,10 @@ import {
   type WaterChemistry,
 } from './chemistry';
 import {
+  FC_ACT_FRACTION,
   NO_SWIM_FC,
+  PH_ACT_HIGH,
+  PH_ACT_LOW,
   REPORT_TA_DROP_PPM,
   STABILISER_RETEST_DAYS,
   WAIT_HOURS,
@@ -41,9 +44,6 @@ import { READING_LABELS, validateProfile, validateReadings } from './validate';
 
 const ALL_READINGS: ReadingKey[] = ['fc', 'ph', 'ta', 'cya'];
 
-/** pH outside this window is an "act now". */
-const PH_ACT_LOW = 7.0;
-const PH_ACT_HIGH = 8.0;
 
 /**
  * Work out an ordered dose plan from a water test.
@@ -352,7 +352,7 @@ function statusFor(
   missing: ReadingKey[],
 ): WaterStatus {
   const { fc, ph } = readings;
-  if (fc !== undefined && (fc > NO_SWIM_FC || fc < targets.fc.min / 2)) return 'act';
+  if (fc !== undefined && (fc > NO_SWIM_FC || fc < targets.fc.min * FC_ACT_FRACTION)) return 'act';
   if (ph !== undefined && (ph < PH_ACT_LOW || ph > PH_ACT_HIGH)) return 'act';
   const flagged = warnings.some((w) => w.code === 'high-alkalinity' || w.code === 'high-chlorine');
   if (steps.length > 0 || missing.length > 0 || flagged) return 'tweak';

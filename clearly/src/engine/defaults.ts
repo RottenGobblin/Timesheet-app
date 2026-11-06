@@ -19,6 +19,13 @@ export const READING_LIMITS = {
 /** Free chlorine above this: no swimming until it drops. */
 export const NO_SWIM_FC = 10;
 
+/** pH outside this window is an "act now". */
+export const PH_ACT_LOW = 7.0;
+export const PH_ACT_HIGH = 8.0;
+
+/** Free chlorine below this fraction of the minimum is an "act now". */
+export const FC_ACT_FRACTION = 0.5;
+
 /** Only mention the alkalinity drop from an acid dose when it's at least this big (ppm). */
 export const REPORT_TA_DROP_PPM = 5;
 

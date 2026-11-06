@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PoolProvider } from '../state/PoolProvider';
+import { TestsProvider } from '../state/TestsProvider';
 import { colours } from '../theme';
 
 export default function RootLayout() {
@@ -23,6 +24,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PoolProvider>
+        <TestsProvider>
         <StatusBar style="dark" />
         <Stack
           screenOptions={{
@@ -32,6 +34,7 @@ export default function RootLayout() {
             animationDuration: 150,
           }}
         />
+        </TestsProvider>
       </PoolProvider>
     </SafeAreaProvider>
   );
