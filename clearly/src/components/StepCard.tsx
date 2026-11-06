@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import type { DoseStep } from '../engine';
 import { formatClock, formatDuration, type StepState } from '../lib/planProgress';
-import { colours, fonts, radius, space } from '../theme';
+import { fonts, makeStyles, radius, space } from '../theme';
 import { TickBox } from './TickBox';
 
 interface Props {
@@ -26,6 +26,7 @@ function waitText(step: DoseStep): string | null {
 }
 
 export function StepCard({ step, number, state, now, canUndo, onTick, onUndo }: Props) {
+  const styles = useStyles();
   const done = state.status === 'done';
   const locked = state.status === 'locked';
 
@@ -88,7 +89,7 @@ export function StepCard({ step, number, state, now, canUndo, onTick, onUndo }: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.card,
@@ -126,4 +127,4 @@ const styles = StyleSheet.create({
   doneRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   doneText: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colours.successInk },
   undo: { fontFamily: fonts.bodySemi, fontSize: 15, color: colours.primaryDark, textDecorationLine: 'underline' },
-});
+}));

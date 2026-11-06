@@ -1,6 +1,6 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card';
@@ -14,15 +14,16 @@ import { followUpFor } from '../lib/followUps';
 import { allDone, canUntick, formatClock, stepStates, tick, untick, type Ticks } from '../lib/planProgress';
 import { cancelReminder, scheduleFollowUp } from '../notifications';
 import { usePool } from '../state/PoolProvider';
+import { useSettings } from '../state/SettingsProvider';
 import { useTests } from '../state/TestsProvider';
 import { loadAnyProgress, loadProgress, saveProgress, type PlanProgress } from '../storage';
 import { asyncStore } from '../storage/asyncStore';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, space, statusColours, TAP, useColours } from '../theme';
 
-const STATUS: Record<WaterStatus, { headline: string; colour: string; ink: string }> = {
-  clear: { headline: 'Crystal clear, go jump in', colour: colours.success, ink: colours.successInk },
-  tweak: { headline: 'Needs a tweak', colour: colours.warningSoft, ink: colours.warningInk },
-  act: { headline: 'Act now', colour: colours.dangerSoft, ink: colours.danger },
+const HEADLINE: Record<WaterStatus, string> = {
+  clear: 'Crystal clear, go jump in',
+  tweak: 'Needs a tweak',
+  act: 'Act now',
 };
 
 const DISCLAIMER =
@@ -49,9 +50,12 @@ function finishedMessage(steps: DoseStep[]): string {
 }
 
 export default function PlanScreen() {
+  const styles = useStyles();
+  const colours = useColours();
   const { testId } = useLocalSearchParams<{ testId?: string }>();
   const { pool, loading: poolLoading } = usePool();
   const { tests, loading: testsLoading } = useTests();
+  const { settings } = useSettings();
   const now = useNow();
 
   const test = testId ? tests.find((t) => t.id === testId) : tests[0];
@@ -91,7 +95,7 @@ export default function PlanScreen() {
       busy.current = true;
       try {
         await cancelReminder(progress.reminderId);
-        const followUp = followUpFor(plan.steps, ticks);
+        const followUp = settings.reminders.doseFollowUps ? followUpFor(plan.steps, ticks, settings.quietHours) : null;
         const reminderId = followUp ? await scheduleFollowUp(followUp) : null;
         const next: PlanProgress = { testId: progress.testId, ticks };
         if (reminderId) next.reminderId = reminderId;
@@ -110,14 +114,14 @@ export default function PlanScreen() {
         busy.current = false;
       }
     },
-    [progress, plan],
+    [progress, plan, settings],
   );
 
   if (poolLoading || testsLoading) return null;
   if (!pool) return <Redirect href="/pool" />;
   if (!test || !plan) return <Redirect href="/" />;
 
-  const status = STATUS[plan.status];
+  const status = { headline: HEADLINE[plan.status], ...statusColours(colours, plan.status) };
   const ticks = progress?.ticks ?? {};
   const states = stepStates(plan.steps, ticks, now);
   const finished = allDone(states);
@@ -133,7 +137,7 @@ export default function PlanScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.status, { backgroundColor: finished ? colours.success : status.colour }]}>
+        <View style={[styles.status, { backgroundColor: finished ? colours.success : status.bg }]}>
           <Text style={[styles.headline, { color: finished ? colours.successInk : status.ink }]}>
             {finished ? 'Clearly sorted' : status.headline}
           </Text>
@@ -194,7 +198,7 @@ export default function PlanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   screen: { flex: 1, backgroundColor: colours.background },
   content: { padding: space.md, gap: space.md, paddingBottom: space.xl * 2 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.sm },
@@ -207,4 +211,4 @@ const styles = StyleSheet.create({
   body: { fontFamily: fonts.body, fontSize: 16, color: colours.ink, lineHeight: 22 },
   reminder: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colours.primaryDark, textAlign: 'center' },
   disclaimer: { fontFamily: fonts.body, fontSize: 13, color: colours.inkMuted, lineHeight: 18, marginTop: space.md },
-});
+}));

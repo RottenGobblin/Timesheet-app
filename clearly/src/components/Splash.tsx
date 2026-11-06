@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Animated, Easing, View } from 'react-native';
 
-import { colours, motion } from '../theme';
+import { makeStyles, motion } from '../theme';
 
 const DROPS = [
   { x: -46, y: -38, size: 12 },
@@ -13,6 +13,7 @@ const DROPS = [
 
 /** A small splash of droplets that pops out and fades. Short, no bounce. */
 export function Splash() {
+  const styles = useStyles();
   const [progress] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export function Splash() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   wrap: { position: 'absolute', top: 40, left: 0, right: 0, alignItems: 'center' },
   drop: { position: 'absolute', backgroundColor: colours.primary },
-});
+}));

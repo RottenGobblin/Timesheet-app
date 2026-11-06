@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card';
@@ -13,7 +13,7 @@ import type { AcidType, PoolLocation, ProductStrengths, Sanitiser } from '../eng
 import { emptyPoolForm, formToPool, poolToForm, relevantStrengths, type PoolForm, type PoolFormErrors } from '../lib/poolForm';
 import { usePool } from '../state/PoolProvider';
 import { PoolValidationError } from '../storage';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, space, TAP, useColours } from '../theme';
 
 const SANITISERS: { value: Sanitiser; label: string }[] = [
   { value: 'liquid', label: 'Liquid' },
@@ -72,6 +72,8 @@ export default function PoolScreen() {
 }
 
 function PoolEditor() {
+  const styles = useStyles();
+  const colours = useColours();
   const { pool, save } = usePool();
   const insets = useSafeAreaInsets();
   const firstTime = pool === null;
@@ -257,7 +259,7 @@ function StrengthStepper({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   screen: { flex: 1, backgroundColor: colours.background },
   flex: { flex: 1 },
   content: { padding: space.md, gap: space.lg, paddingBottom: space.xl },
@@ -295,4 +297,4 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colours.border,
   },
-});
+}));

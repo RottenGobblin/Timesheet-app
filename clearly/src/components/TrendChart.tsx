@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Text, View, type LayoutChangeEvent } from 'react-native';
 import Svg, { Circle, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { Range, ReadingKey } from '../engine';
 import { layoutChart, yDomain, type Point } from '../lib/chart';
 import { formatReading, READING_CONFIG } from '../lib/readings';
-import { colours, fonts, radius, space } from '../theme';
+import { fonts, makeStyles, radius, space, useColours } from '../theme';
 
 interface Props {
   reading: ReadingKey;
@@ -19,6 +19,8 @@ const BOX = { padLeft: 36, padRight: 12, padTop: 10, padBottom: 10 };
 
 /** A small trend line for one reading, with the ideal zone shaded lime. */
 export function TrendChart({ reading, points, band, xRange }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   const [width, setWidth] = useState(0);
   const cfg = READING_CONFIG[reading];
   const latest = points[points.length - 1];
@@ -101,7 +103,7 @@ export function TrendChart({ reading, points, band, xRange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.card,
@@ -123,4 +125,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colours.inkMuted,
   },
-});
+}));

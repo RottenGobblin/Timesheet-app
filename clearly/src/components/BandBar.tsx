@@ -1,16 +1,13 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import type { BandScale, Severity } from '../lib/readings';
-import { colours, radius } from '../theme';
+import { makeStyles, radius, severityFill, useColours } from '../theme';
 
-export const SEVERITY_COLOUR: Record<Severity, string> = {
-  good: colours.success,
-  adjust: colours.warning,
-  danger: colours.danger,
-};
 
 /** Low / ideal / high bar with a marker at the current value. */
 export function BandBar({ scale, position, severity }: { scale: BandScale; position: number; severity: Severity }) {
+  const styles = useStyles();
+  const colours = useColours();
   const low = scale.idealStart;
   const ideal = scale.idealEnd - scale.idealStart;
   const high = 1 - scale.idealEnd;
@@ -21,14 +18,14 @@ export function BandBar({ scale, position, severity }: { scale: BandScale; posit
         <View style={[styles.zone, styles.idealZone, { flex: ideal }]} />
         {high > 0 ? <View style={[styles.zone, styles.adjustZone, { flex: high }]} /> : null}
       </View>
-      <View style={[styles.marker, { left: `${position * 100}%`, borderColor: SEVERITY_COLOUR[severity] }]} />
+      <View style={[styles.marker, { left: `${position * 100}%`, borderColor: severityFill(colours, severity) }]} />
     </View>
   );
 }
 
 const MARKER = 22;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   wrap: { height: MARKER, justifyContent: 'center', marginHorizontal: MARKER / 2 },
   track: { flexDirection: 'row', height: 10, borderRadius: radius.pill, overflow: 'hidden', gap: 2 },
   zone: { height: '100%' },
@@ -43,4 +40,4 @@ const styles = StyleSheet.create({
     backgroundColor: colours.surface,
     borderWidth: 5,
   },
-});
+}));

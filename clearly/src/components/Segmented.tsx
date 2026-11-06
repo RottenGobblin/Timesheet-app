@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP } from '../theme';
 
 export interface SegmentOption<T extends string> {
   value: T;
@@ -16,6 +16,7 @@ interface Props<T extends string> {
 
 /** Big, thumb-friendly single choice. */
 export function Segmented<T extends string>({ options, value, onChange, accessibilityLabel }: Props<T>) {
+  const styles = useStyles();
   return (
     <View style={styles.row} accessibilityRole="radiogroup" accessibilityLabel={accessibilityLabel}>
       {options.map((o) => {
@@ -36,7 +37,7 @@ export function Segmented<T extends string>({ options, value, onChange, accessib
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   row: {
     flexDirection: 'row',
     backgroundColor: colours.primarySoft,
@@ -55,4 +56,4 @@ const styles = StyleSheet.create({
   selected: { backgroundColor: colours.primary },
   label: { fontFamily: fonts.bodySemi, fontSize: 16, color: colours.primaryDark },
   selectedLabel: { color: colours.surface },
-});
+}));

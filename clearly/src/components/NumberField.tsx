@@ -1,6 +1,6 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP, useColours } from '../theme';
 
 interface Props {
   label: string;
@@ -15,6 +15,8 @@ interface Props {
 }
 
 export function NumberField({ label, value, onChangeText, unit, placeholder, hint, error, decimal, large }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
@@ -37,7 +39,7 @@ export function NumberField({ label, value, onChangeText, unit, placeholder, hin
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   wrap: { gap: 8, flex: 1, minWidth: 0 },
   label: { fontFamily: fonts.bodySemi, fontSize: 16, color: colours.ink },
   box: {
@@ -56,4 +58,4 @@ const styles = StyleSheet.create({
   unit: { fontFamily: fonts.bodyMedium, fontSize: 18, color: colours.inkMuted, marginLeft: 8 },
   hint: { fontFamily: fonts.body, fontSize: 14, color: colours.inkMuted },
   error: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colours.danger },
-});
+}));

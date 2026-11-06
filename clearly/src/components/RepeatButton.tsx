@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP, useColours } from '../theme';
 
 interface Props {
   symbol: string;
@@ -16,6 +16,8 @@ const REPEAT_EVERY = 90;
 
 /** Round − / + button. Tap to step once, hold to keep stepping. */
 export function RepeatButton({ symbol, accessibilityLabel, onStep, disabled, size = TAP + 8 }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latest = useRef(onStep);
   useEffect(() => {
@@ -59,7 +61,7 @@ export function RepeatButton({ symbol, accessibilityLabel, onStep, disabled, siz
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   button: {
     borderRadius: radius.pill,
     backgroundColor: colours.primary,
@@ -67,4 +69,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   symbol: { fontFamily: fonts.heading, fontSize: 32, color: colours.surface, lineHeight: 36 },
-});
+}));

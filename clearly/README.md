@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** dosing engine, local storage, the pool profile, Test, Plan (with dose follow-up reminders) and History are done. Settings, the full Home card and the scheduled test reminders come next.
+> **Status:** dosing engine, local storage, the pool profile, Test, Plan, History and Settings (with all three reminder types and sun mode) are done. The full Home water health card is next, then testing on a real phone.
 
 ## Setup
 
@@ -39,14 +39,14 @@ npm run check      # all three
 
 ```
 src/
-  app/         Expo Router routes: index (interim Home), pool, test, plan, history
+  app/         Expo Router routes: index (interim Home), pool, test, plan, history, settings
   notifications/  Local notification wrapper (no-op on web or without permission)
   components/  Shared UI: pill button, segmented control, stepper, number field, card
   engine/      Dosing engine: pure TypeScript, no React or Expo imports
   lib/         Pure helpers: volume calculator, number parsing, pool form logic
-  state/       React context for the saved pool and test history
+  state/       React context: pool, tests, settings (applies sun mode), reminders sync
   storage/     Local storage: pool profile and test history repositories
-  theme.ts     Palette, fonts, radii and spacing
+  theme.ts     Normal and sun mode palettes, makeStyles, fonts, radii and spacing
 ```
 
 ESLint blocks React and Expo imports inside `src/engine/`, so the engine stays reusable on web or a backend later.
@@ -87,7 +87,8 @@ The pool screen sets volume, sanitiser (liquid, granular or salt), indoor or out
 Ticking a step that has a wait schedules a local notification for when it ends, e.g. "4 hours are up, ready for the chlorine?". Rules:
 
 - Chlorine follow-ups move to 6 pm if the wait ends earlier in the day.
-- Nothing fires in quiet hours (9 pm to 7 am for now; adjustable once Settings is built). A reminder that would land then moves to 7 am.
+- Nothing fires in quiet hours (default 9 pm to 7 am, set in Settings). A reminder that would land then moves to when quiet hours end.
+- Can be switched off in Settings.
 - Undoing a tick, finishing the plan or starting a new test cancels the pending reminder.
 - Permission is only asked the first time a reminder is needed. Notifications don't run on web.
 
@@ -97,6 +98,29 @@ Ticking a step that has a wait schedules a local notification for when it ends, 
 - Each chart shades the ideal range in lime and marks readings outside it with coral dots. Points are spaced by date, so gaps between tests show as gaps. The chlorine band uses the most recent stabiliser reading.
 - Charts are drawn with `react-native-svg` (bundled in Expo Go), no chart library.
 - Past tests, newest first: date, a status pill, the four readings (out-of-range ones in coral or red) and notes. Tap a test to see its plan (latest test only), add or edit its note, or delete it with a confirm step. Deleting a test also cancels any reminder its plan had pending.
+
+## Settings
+
+- **Pool and products:** links to the pool profile screen.
+- **Test reminders:** on by default, twice a week in summer (November to March) and once a week in winter, on Wednesday and Saturday (once: Saturday; three times: Monday, Wednesday, Saturday). Choose once, twice or three times for each season, at 8 am or 6 pm.
+- **Dose follow-ups** and the **overdue check-in** can each be switched off.
+- **Quiet hours:** default 9 pm to 7 am, set by the hour.
+- **Sun mode:** a high-contrast palette (darker text and accents, pure white, strong borders) for reading outdoors. It applies across the whole app.
+- If notifications are blocked on the phone, Settings says so and offers to ask again.
+
+### How test and overdue reminders are scheduled
+
+`src/lib/reminderSchedule.ts` plans the next four weeks, and the app reschedules whenever tests or settings change (and at start-up):
+
+- No test reminder on the day of a test or the day after.
+- One overdue nudge 10 days after the last test ("Your pool might be getting ideas"), then it backs off: no more test or overdue reminders until the next test.
+- At most one of these a day (the overdue nudge wins). Dose follow-ups you started are separate.
+- Nothing during quiet hours.
+- Permission is first asked after you save a test, or when you switch a reminder on.
+
+### Theming
+
+Styles are written with `makeStyles((colours) => ({ ... }))` and used with `const styles = useStyles()`, so every screen follows the active palette. Status and severity colours come from `statusColours`, `severityFill` and `severityInk` in `theme.ts`.
 
 ## Dosing engine
 

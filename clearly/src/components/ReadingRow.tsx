@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import type { ReadingKey, Targets } from '../engine';
 import { parseNumber } from '../lib/number';
@@ -11,17 +11,11 @@ import {
   READING_CONFIG,
   stepReading,
   verdict,
-  type Severity,
 } from '../lib/readings';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, severityInk, space, TAP, useColours } from '../theme';
 import { BandBar } from './BandBar';
 import { RepeatButton } from './RepeatButton';
 
-const MESSAGE_COLOUR: Record<Severity, string> = {
-  good: colours.successInk,
-  adjust: colours.warningInk,
-  danger: colours.danger,
-};
 
 interface Props {
   reading: ReadingKey;
@@ -33,6 +27,8 @@ interface Props {
 }
 
 export function ReadingRow({ reading, value, onChange, targets, startValue }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   const cfg = READING_CONFIG[reading];
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState('');
@@ -127,12 +123,12 @@ export function ReadingRow({ reading, value, onChange, targets, startValue }: Pr
       </View>
 
       <BandBar scale={scale} position={markerPosition(value, scale)} severity={v.severity} />
-      <Text style={[styles.message, { color: MESSAGE_COLOUR[v.severity] }]}>{v.message}</Text>
+      <Text style={[styles.message, { color: severityInk(colours, v.severity) }]}>{v.message}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.card,
@@ -174,4 +170,4 @@ const styles = StyleSheet.create({
   },
   unit: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colours.inkMuted, marginTop: -4 },
   message: { fontFamily: fonts.bodyMedium, fontSize: 15, textAlign: 'center' },
-});
+}));

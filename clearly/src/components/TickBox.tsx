@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP } from '../theme';
 
 interface Props {
   checked: boolean;
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function TickBox({ checked, disabled, onPress, accessibilityLabel }: Props) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -30,7 +31,7 @@ export function TickBox({ checked, disabled, onPress, accessibilityLabel }: Prop
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   box: {
     width: TAP,
     height: TAP,
@@ -44,4 +45,4 @@ const styles = StyleSheet.create({
   checked: { backgroundColor: colours.success, borderColor: colours.success },
   disabled: { borderColor: colours.border, backgroundColor: colours.background },
   tick: { fontFamily: fonts.heading, fontSize: 30, color: colours.ink, lineHeight: 34 },
-});
+}));

@@ -1,6 +1,6 @@
 import { Redirect, router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card';
@@ -13,7 +13,7 @@ import { inPeriod, seriesFor, xRangeFor, type Period } from '../lib/chart';
 import { READING_CONFIG, READING_ORDER } from '../lib/readings';
 import { usePool } from '../state/PoolProvider';
 import { useTests } from '../state/TestsProvider';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, space, TAP } from '../theme';
 
 const PERIODS: { value: Period; label: string }[] = [
   { value: '30d', label: '30 days' },
@@ -22,6 +22,7 @@ const PERIODS: { value: Period; label: string }[] = [
 ];
 
 export default function HistoryScreen() {
+  const styles = useStyles();
   const { pool, loading: poolLoading } = usePool();
   const { tests, loading: testsLoading, updateNotes, remove } = useTests();
   const [period, setPeriod] = useState<Period>('30d');
@@ -111,7 +112,7 @@ export default function HistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   screen: { flex: 1, backgroundColor: colours.background },
   content: { padding: space.md, gap: space.md, paddingBottom: space.xl * 2 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.sm },
@@ -133,4 +134,4 @@ const styles = StyleSheet.create({
   chipTextOn: { color: colours.surface },
   legend: { fontFamily: fonts.body, fontSize: 13, color: colours.inkMuted, textAlign: 'center' },
   section: { fontFamily: fonts.heading, fontSize: 22, color: colours.ink, marginTop: space.md },
-});
+}));

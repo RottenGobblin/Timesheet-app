@@ -26,3 +26,14 @@ export function formatTestDate(iso: string, now: Date = new Date()): string {
 export function daysSince(iso: string, now: Date = new Date()): number {
   return Math.round((startOfDay(now) - startOfDay(new Date(iso))) / 86_400_000);
 }
+
+/** 21 → "9 pm", 0 → "12 am", 12 → "12 pm". */
+export function formatHour(hour: number): string {
+  const h = ((hour % 24) + 24) % 24;
+  return `${h % 12 === 0 ? 12 : h % 12} ${h < 12 ? 'am' : 'pm'}`;
+}
+
+/** Step an hour of the day, wrapping around midnight. */
+export function stepHour(hour: number, by: number): number {
+  return (((hour + by) % 24) + 24) % 24;
+}

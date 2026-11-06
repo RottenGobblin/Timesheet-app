@@ -1,6 +1,6 @@
 import { Redirect, router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PillButton } from '../components/PillButton';
@@ -9,13 +9,17 @@ import { Ripple } from '../components/Ripple';
 import { getTargets, type ReadingKey, type Readings } from '../engine';
 import { READING_ORDER, startingValue } from '../lib/readings';
 import { usePool } from '../state/PoolProvider';
+import { useReminders } from '../state/RemindersProvider';
 import { useTests } from '../state/TestsProvider';
 import { TestValidationError } from '../storage';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, space, TAP, useColours } from '../theme';
 
 export default function TestScreen() {
+  const styles = useStyles();
+  const colours = useColours();
   const { pool, loading: poolLoading } = usePool();
   const { tests, loading: testsLoading, add } = useTests();
+  const { requestAndSync } = useReminders();
   const insets = useSafeAreaInsets();
 
   const [readings, setReadings] = useState<Readings>({});
@@ -56,6 +60,8 @@ export default function TestScreen() {
     try {
       await add({ readings, notes });
       setRippling(true);
+      // First save is a natural moment to ask about reminders. Doesn't block the ripple.
+      requestAndSync().catch(() => undefined);
     } catch (e) {
       setError(e instanceof TestValidationError ? e.message : 'Couldn’t save this test. Try again in a moment.');
       setSaving(false);
@@ -123,7 +129,7 @@ export default function TestScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   screen: { flex: 1, backgroundColor: colours.background },
   flex: { flex: 1 },
   content: { padding: space.md, gap: space.md, paddingBottom: space.xl },
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
   scan: {
     minHeight: TAP,
     borderRadius: radius.pill,
-    backgroundColor: colours.border,
+    backgroundColor: colours.muted,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -175,4 +181,4 @@ const styles = StyleSheet.create({
     borderTopColor: colours.border,
   },
   count: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colours.inkMuted, textAlign: 'center' },
-});
+}));

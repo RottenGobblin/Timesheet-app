@@ -1,7 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { stepValue } from '../lib/number';
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP, useColours } from '../theme';
 
 interface Props {
   label: string;
@@ -17,6 +17,7 @@ interface Props {
 
 /** Large − / + stepper for values that rarely change, like product strengths. */
 export function Stepper({ label, value, onChange, step, min, max, unit = '', hint, error }: Props) {
+  const styles = useStyles();
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
@@ -34,6 +35,8 @@ export function Stepper({ label, value, onChange, step, min, max, unit = '', hin
 }
 
 function StepButton({ symbol, label, onPress, disabled }: { symbol: string; label: string; onPress(): void; disabled: boolean }) {
+  const styles = useStyles();
+  const colours = useColours();
   return (
     <Pressable
       accessibilityRole="button"
@@ -48,7 +51,7 @@ function StepButton({ symbol, label, onPress, disabled }: { symbol: string; labe
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   wrap: { gap: 8 },
   label: { fontFamily: fonts.bodySemi, fontSize: 16, color: colours.ink },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -64,4 +67,4 @@ const styles = StyleSheet.create({
   value: { fontFamily: fonts.bodySemi, fontSize: 28, color: colours.ink, fontVariant: ['tabular-nums'] },
   hint: { fontFamily: fonts.body, fontSize: 14, color: colours.inkMuted },
   error: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colours.danger },
-});
+}));

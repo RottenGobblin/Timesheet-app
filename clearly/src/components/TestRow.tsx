@@ -1,23 +1,17 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { buildDosePlan, getTargets, type PoolProfile, type WaterStatus } from '../engine';
 import { formatTestDate } from '../lib/dates';
 import { formatReading, READING_CONFIG, READING_ORDER, verdict, type Severity } from '../lib/readings';
 import type { TestRecord } from '../storage';
-import { colours, fonts, radius, space, TAP } from '../theme';
+import { fonts, makeStyles, radius, severityInk, space, statusColours, TAP, useColours } from '../theme';
 import { PillButton } from './PillButton';
 
-const STATUS: Record<WaterStatus, { label: string; bg: string; ink: string }> = {
-  clear: { label: 'Crystal clear', bg: colours.success, ink: colours.successInk },
-  tweak: { label: 'Needed a tweak', bg: colours.warningSoft, ink: colours.warningInk },
-  act: { label: 'Act now', bg: colours.dangerSoft, ink: colours.danger },
-};
-
-const VALUE_COLOUR: Record<Severity, string> = {
-  good: colours.ink,
-  adjust: colours.warningInk,
-  danger: colours.danger,
+const STATUS_LABEL: Record<WaterStatus, string> = {
+  clear: 'Crystal clear',
+  tweak: 'Needed a tweak',
+  act: 'Act now',
 };
 
 interface Props {
@@ -30,13 +24,17 @@ interface Props {
 }
 
 export function TestRow({ test, pool, isLatest, onOpenPlan, onSaveNotes, onDelete }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(test.notes);
   const [confirming, setConfirming] = useState(false);
 
   const targets = getTargets(pool, test.readings.cya);
-  const status = STATUS[buildDosePlan(pool, test.readings).testedStatus];
+  const valueColour = (sev: Severity) => (sev === 'good' ? colours.ink : severityInk(colours, sev));
+  const tested = buildDosePlan(pool, test.readings).testedStatus;
+  const status = { label: STATUS_LABEL[tested], ...statusColours(colours, tested) };
   const summary = READING_ORDER.map((k) => {
     const v = test.readings[k];
     return v === undefined ? `${READING_CONFIG[k].label} not tested` : `${READING_CONFIG[k].label} ${formatReading(k, v)}`;
@@ -63,7 +61,7 @@ export function TestRow({ test, pool, isLatest, onOpenPlan, onSaveNotes, onDelet
         <View style={styles.values}>
           {READING_ORDER.map((k) => {
             const v = test.readings[k];
-            const colour = v === undefined ? colours.inkMuted : VALUE_COLOUR[verdict(k, v, targets).severity];
+            const colour = v === undefined ? colours.inkMuted : valueColour(verdict(k, v, targets).severity);
             return (
               <View key={k} style={styles.value}>
                 <Text style={styles.valueLabel}>{k === 'fc' ? 'FC' : k === 'ph' ? 'pH' : k === 'ta' ? 'TA' : 'CYA'}</Text>
@@ -142,6 +140,8 @@ export function TestRow({ test, pool, isLatest, onOpenPlan, onSaveNotes, onDelet
 }
 
 function TextAction({ label, onPress, danger }: { label: string; onPress(): void; danger?: boolean }) {
+  const styles = useStyles();
+  const colours = useColours();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.textAction} hitSlop={4}>
       <Text style={[styles.textActionLabel, danger && { color: colours.danger }]}>{label}</Text>
@@ -149,7 +149,7 @@ function TextAction({ label, onPress, danger }: { label: string; onPress(): void
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.card,
@@ -194,4 +194,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   deleteButtonText: { fontFamily: fonts.headingSemi, fontSize: 18, color: colours.surface },
-});
+}));

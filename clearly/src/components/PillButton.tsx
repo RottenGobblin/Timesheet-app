@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, Text, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colours, fonts, radius, TAP } from '../theme';
+import { fonts, makeStyles, radius, TAP, useColours } from '../theme';
 
 interface Props {
   label: string;
@@ -11,6 +11,8 @@ interface Props {
 }
 
 export function PillButton({ label, onPress, variant = 'primary', disabled, style }: Props) {
+  const styles = useStyles();
+  const colours = useColours();
   const primary = variant === 'primary';
   return (
     <Pressable
@@ -31,7 +33,7 @@ export function PillButton({ label, onPress, variant = 'primary', disabled, styl
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   base: {
     minHeight: TAP,
     borderRadius: radius.pill,
@@ -42,4 +44,4 @@ const styles = StyleSheet.create({
   primary: { backgroundColor: colours.primary },
   secondary: { backgroundColor: colours.primarySoft },
   label: { fontFamily: fonts.headingSemi, fontSize: 18 },
-});
+}));

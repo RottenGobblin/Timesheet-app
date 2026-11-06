@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colours, fonts, radius, space } from '../theme';
+import { fonts, makeStyles, radius, space } from '../theme';
 
 export function Card({ title, children }: { title?: string; children: ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.card}>
       {title ? <Text style={styles.title}>{title}</Text> : null}
@@ -12,7 +13,7 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   card: {
     backgroundColor: colours.surface,
     borderRadius: radius.card,
@@ -22,4 +23,4 @@ const styles = StyleSheet.create({
     borderColor: colours.border,
   },
   title: { fontFamily: fonts.heading, fontSize: 20, color: colours.ink },
-});
+}));

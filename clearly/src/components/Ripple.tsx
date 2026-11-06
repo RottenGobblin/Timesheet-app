@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, useWindowDimensions } from 'react-native';
+import { Animated, Easing, useWindowDimensions } from 'react-native';
 
-import { colours, motion } from '../theme';
+import { makeStyles, motion } from '../theme';
 
 /**
  * One quick ripple spreading up from the bottom of the screen, used when a test is saved.
  * Short and calm: no bounce. Calls onDone when finished.
  */
 export function Ripple({ onDone }: { onDone(): void }) {
+  const styles = useStyles();
   const [progress] = useState(() => new Animated.Value(0));
   const { width, height } = useWindowDimensions();
   const size = Math.hypot(width, height) * 2;
@@ -44,6 +45,6 @@ export function Ripple({ onDone }: { onDone(): void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   circle: { position: 'absolute', backgroundColor: colours.primary },
-});
+}));

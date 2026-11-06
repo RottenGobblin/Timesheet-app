@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   pool: 'clearly/pool',
   tests: 'clearly/tests',
   planProgress: 'clearly/plan-progress',
+  settings: 'clearly/settings',
 } as const;
 
 /**

@@ -7,8 +7,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { configureNotifications } from '../notifications';
 import { PoolProvider } from '../state/PoolProvider';
+import { RemindersProvider } from '../state/RemindersProvider';
+import { SettingsProvider, useSettings } from '../state/SettingsProvider';
 import { TestsProvider } from '../state/TestsProvider';
-import { colours } from '../theme';
+import { useColours } from '../theme';
 
 configureNotifications();
 
@@ -26,19 +28,35 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <PoolProvider>
-        <TestsProvider>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colours.background },
-            animation: 'fade',
-            animationDuration: 150,
-          }}
-        />
-        </TestsProvider>
-      </PoolProvider>
+      <SettingsProvider>
+        <PoolProvider>
+          <TestsProvider>
+            <RemindersProvider>
+              <AppStack />
+            </RemindersProvider>
+          </TestsProvider>
+        </PoolProvider>
+      </SettingsProvider>
     </SafeAreaProvider>
+  );
+}
+
+function AppStack() {
+  const colours = useColours();
+  const { loading } = useSettings();
+  // Wait for settings so sun mode doesn't flash the normal palette first.
+  if (loading) return null;
+  return (
+    <>
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colours.background },
+          animation: 'fade',
+          animationDuration: 150,
+        }}
+      />
+    </>
   );
 }

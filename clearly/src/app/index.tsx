@@ -1,5 +1,5 @@
 import { Redirect, router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card } from '../components/Card';
@@ -10,18 +10,20 @@ import { formatLitres } from '../lib/number';
 import { formatReading, READING_CONFIG, READING_ORDER } from '../lib/readings';
 import { usePool } from '../state/PoolProvider';
 import { useTests } from '../state/TestsProvider';
-import { colours, fonts, radius, space } from '../theme';
+import { fonts, makeStyles, radius, space, statusColours, useColours } from '../theme';
 
 const SANITISER_LABEL = { liquid: 'Liquid chlorine', granular: 'Granular chlorine', salt: 'Salt chlorinator' } as const;
 
-const STATUS: Record<WaterStatus, { headline: string; colour: string; ink: string }> = {
-  clear: { headline: 'Crystal clear, go jump in', colour: colours.success, ink: colours.successInk },
-  tweak: { headline: 'Needs a tweak', colour: colours.warningSoft, ink: colours.warningInk },
-  act: { headline: 'Act now', colour: colours.dangerSoft, ink: colours.danger },
+const HEADLINE: Record<WaterStatus, string> = {
+  clear: 'Crystal clear, go jump in',
+  tweak: 'Needs a tweak',
+  act: 'Act now',
 };
 
 // Interim Home: shows the latest test result until the water health card is built.
 export default function Home() {
+  const styles = useStyles();
+  const colours = useColours();
   const { pool, loading } = usePool();
   const { tests, loading: testsLoading } = useTests();
 
@@ -30,16 +32,27 @@ export default function Home() {
 
   const latest = tests[0];
   const plan = latest ? buildDosePlan(pool, latest.readings) : null;
-  const status = plan ? STATUS[plan.status] : null;
+  const status = plan ? { headline: HEADLINE[plan.status], ...statusColours(colours, plan.status) } : null;
 
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Clearly</Text>
+        <View style={styles.topRow}>
+          <Text style={styles.title}>Clearly</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            onPress={() => router.push('/settings')}
+            hitSlop={12}
+            style={styles.settings}
+          >
+            <Text style={styles.settingsText}>Settings</Text>
+          </Pressable>
+        </View>
 
         {latest && plan && status ? (
           <Card>
-            <View style={[styles.status, { backgroundColor: status.colour }]}>
+            <View style={[styles.status, { backgroundColor: status.bg }]}>
               <Text style={[styles.headline, { color: status.ink }]}>{status.headline}</Text>
             </View>
             <Text style={styles.sub}>Last test: {formatTestDate(latest.takenAt)}</Text>
@@ -80,10 +93,13 @@ export default function Home() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   screen: { flex: 1, backgroundColor: colours.background },
   content: { padding: space.md, gap: space.lg },
-  title: { fontFamily: fonts.heading, fontSize: 36, color: colours.primary, marginTop: space.md },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.md },
+  title: { fontFamily: fonts.heading, fontSize: 36, color: colours.primary },
+  settings: { minHeight: 48, justifyContent: 'center', paddingHorizontal: space.sm },
+  settingsText: { fontFamily: fonts.bodySemi, fontSize: 17, color: colours.primaryDark },
   status: { borderRadius: radius.input, padding: space.md },
   headline: { fontFamily: fonts.heading, fontSize: 24 },
   sub: { fontFamily: fonts.body, fontSize: 16, color: colours.inkMuted, lineHeight: 22 },
@@ -91,4 +107,4 @@ const styles = StyleSheet.create({
   reading: { width: '50%' },
   readingLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colours.inkMuted },
   readingValue: { fontFamily: fonts.bodySemi, fontSize: 24, color: colours.ink, fontVariant: ['tabular-nums'] },
-});
+}));

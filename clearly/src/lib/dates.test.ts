@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysSince, formatTestDate } from './dates';
+import { daysSince, formatHour, formatTestDate, stepHour } from './dates';
 
 // Local times, so the tests don't depend on the machine's time zone.
 const now = new Date(2026, 10, 6, 18, 0);
@@ -26,5 +26,22 @@ describe('daysSince', () => {
   it('counts calendar days', () => {
     expect(daysSince(new Date(2026, 10, 6, 1, 0).toISOString(), now)).toBe(0);
     expect(daysSince(new Date(2026, 9, 27, 23, 0).toISOString(), now)).toBe(10);
+  });
+});
+
+describe('formatHour', () => {
+  it('formats hours as am/pm', () => {
+    expect(formatHour(21)).toBe('9 pm');
+    expect(formatHour(7)).toBe('7 am');
+    expect(formatHour(0)).toBe('12 am');
+    expect(formatHour(12)).toBe('12 pm');
+  });
+});
+
+describe('stepHour', () => {
+  it('wraps around midnight', () => {
+    expect(stepHour(23, 1)).toBe(0);
+    expect(stepHour(0, -1)).toBe(23);
+    expect(stepHour(9, 1)).toBe(10);
   });
 });

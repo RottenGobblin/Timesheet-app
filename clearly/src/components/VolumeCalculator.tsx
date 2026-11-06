@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { formatLitres, parseNumber } from '../lib/number';
 import { poolVolumeLitres, type PoolShape } from '../lib/volume';
-import { colours, fonts, space } from '../theme';
+import { fonts, makeStyles, space } from '../theme';
 import { NumberField } from './NumberField';
 import { PillButton } from './PillButton';
 import { Segmented, type SegmentOption } from './Segmented';
@@ -16,6 +16,7 @@ const SHAPES: SegmentOption<PoolShape>[] = [
 
 /** Works out volume from the pool's size, for owners who don't know it. */
 export function VolumeCalculator({ onUse }: { onUse(litres: number): void }) {
+  const styles = useStyles();
   const [shape, setShape] = useState<PoolShape>('rectangle');
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
@@ -55,10 +56,10 @@ export function VolumeCalculator({ onUse }: { onUse(litres: number): void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colours) => ({
   wrap: { gap: space.md },
   row: { flexDirection: 'row', gap: space.md },
   hint: { fontFamily: fonts.body, fontSize: 14, color: colours.inkMuted },
   result: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
   resultText: { fontFamily: fonts.heading, fontSize: 24, color: colours.ink },
-});
+}));
