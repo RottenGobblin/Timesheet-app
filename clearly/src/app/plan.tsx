@@ -16,6 +16,7 @@ import { cancelReminder, scheduleFollowUp } from '../notifications';
 import { usePool } from '../state/PoolProvider';
 import { useSettings } from '../state/SettingsProvider';
 import { useTests } from '../state/TestsProvider';
+import { useNow } from '../state/useNow';
 import { loadAnyProgress, loadProgress, saveProgress, type PlanProgress } from '../storage';
 import { asyncStore } from '../storage/asyncStore';
 import { fonts, makeStyles, radius, space, statusColours, TAP, useColours } from '../theme';
@@ -28,16 +29,6 @@ const HEADLINE: Record<WaterStatus, string> = {
 
 const DISCLAIMER =
   'Doses are guidance based on the readings entered. Always follow the product label, and check with a pool professional if unsure.';
-
-/** Re-render often enough for countdowns to stay accurate to the minute. */
-function useNow(intervalMs = 30_000): Date {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
-}
 
 function finishedMessage(steps: DoseStep[]): string {
   if (steps.some((s) => s.kind === 'drain')) {

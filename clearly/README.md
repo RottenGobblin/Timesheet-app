@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** dosing engine, local storage, the pool profile, Test, Plan, History and Settings (with all three reminder types and sun mode) are done. The full Home water health card is next, then testing on a real phone.
+> **Status:** all v1 screens are built: Home, Test, Plan, History and Settings, with local storage, all three reminder types and sun mode. What's left for v1 is a run on a real phone in Expo Go; see [PHONE-TEST.md](PHONE-TEST.md).
 
 ## Setup
 
@@ -19,6 +19,7 @@ npm install
 
 ```bash
 npm start          # Expo dev server, scan the QR code with Expo Go
+npx expo start --tunnel  # if your phone can't reach your computer on the same network
 npm run android    # open on an Android device or emulator
 npm run ios        # open on an iOS simulator (macOS only)
 npm run web        # quick check in a browser (storage uses localStorage there)
@@ -39,7 +40,7 @@ npm run check      # all three
 
 ```
 src/
-  app/         Expo Router routes: index (interim Home), pool, test, plan, history, settings
+  app/         Expo Router routes: index (Home), pool, test, plan, history, settings
   notifications/  Local notification wrapper (no-op on web or without permission)
   components/  Shared UI: pill button, segmented control, stepper, number field, card
   engine/      Dosing engine: pure TypeScript, no React or Expo imports
@@ -65,13 +66,24 @@ Everything is stored on the device with AsyncStorage. There is no backend in v1.
 
 The pool screen sets volume, sanitiser (liquid, granular or salt), indoor or outdoor, and product strengths. Only the strengths that matter are shown (for example, granular strength for granular pools, dry acid purity if you use dry acid). Owners who don't know their volume can work it out from the size of a rectangle, round or oval pool, with shallow and deep end depths.
 
+## Home
+
+One water health card:
+
+- A big status: "Crystal clear, go jump in", "Needs a tweak", "Act now", "Clearly sorted" once every plan step is ticked, or "Your pool might be getting ideas" when the last test is 10 or more days old.
+- When you last tested, with a lime, coral or red dot.
+- A water level that rises and settles with water health (higher is healthier). The animation is a short ease-out with no bounce, and is skipped when Reduce Motion is on.
+- One clear next action: the first unticked dose step ("Add 230 mL chlorine", or "Next: ..." with the time it's ready), "Test the rest" if readings were skipped, or "Test water" with when the next test is due.
+- A plain no-swimming line on the card when chlorine is above 10 ppm.
+
+The logic is in `src/lib/homeSummary.ts` and tested separately from the card.
+
 ## Test screen
 
 - Each reading starts as "Not tested". Tap **Add reading** to start it at the last test's value (or the ideal on the first test).
 - Big − / + buttons step by test-kit resolution (FC 0.5, pH 0.1, TA and CYA 10). Hold to keep stepping, or tap the number to type it.
 - A low / ideal / high bar shows where each value sits, with a short line underneath. The chlorine bar moves with the stabiliser reading. Lime is ideal, coral is adjust, and deep red is kept for act-now and safety cases (FC above 10, very low FC, pH below 7.0 or above 8.0), which use plain wording.
 - Optional notes, a "Scan strip" placeholder marked coming soon, and a quick ripple on save.
-- The interim Home shows the latest result (Crystal clear / Needs a tweak / Act now) and the readings.
 
 ## Plan screen
 

@@ -41,7 +41,7 @@ export function followUpTime(readyAt: Date, nextStep: Pick<DoseStep, 'bestTime'>
   return outOfQuietHours(at, quiet);
 }
 
-const NOUN: Record<StepKind, string> = {
+export const STEP_NOUN: Record<StepKind, string> = {
   'raise-alkalinity': 'bicarb',
   'lower-ph': 'acid',
   'raise-ph': 'soda ash',
@@ -53,7 +53,7 @@ const NOUN: Record<StepKind, string> = {
 /** "4 hours are up, ready for the chlorine?" */
 export function followUpMessage(waitHours: number, next: StepKind): string {
   const hours = waitHours === 1 ? '1 hour is' : `${waitHours} hours are`;
-  return `${hours} up, ready for the ${NOUN[next]}?`;
+  return `${hours} up, ready for the ${STEP_NOUN[next]}?`;
 }
 
 export interface FollowUp {
