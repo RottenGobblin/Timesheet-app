@@ -36,7 +36,7 @@ export function TestRow({ test, pool, isLatest, onOpenPlan, onSaveNotes, onDelet
   const [confirming, setConfirming] = useState(false);
 
   const targets = getTargets(pool, test.readings.cya);
-  const status = STATUS[buildDosePlan(pool, test.readings).status];
+  const status = STATUS[buildDosePlan(pool, test.readings).testedStatus];
   const summary = READING_ORDER.map((k) => {
     const v = test.readings[k];
     return v === undefined ? `${READING_CONFIG[k].label} not tested` : `${READING_CONFIG[k].label} ${formatReading(k, v)}`;

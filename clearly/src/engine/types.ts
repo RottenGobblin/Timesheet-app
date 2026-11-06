@@ -132,7 +132,10 @@ export interface Warning {
 }
 
 export interface DosePlan {
+  /** Overall status. Untested readings count as something to do. */
   status: WaterStatus;
+  /** Status from the tested readings only, ignoring any that were skipped (used in History). */
+  testedStatus: WaterStatus;
   steps: DoseStep[];
   warnings: Warning[];
   /** Readings that weren't entered. */

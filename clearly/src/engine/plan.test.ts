@@ -258,3 +258,24 @@ describe('scaling', () => {
     expect(big.steps[0]!.amount).toMatchObject({ base: 1200, unit: 'L', display: '1.2 L' });
   });
 });
+
+describe('testedStatus (History)', () => {
+  it('ignores readings that were not tested', () => {
+    const p = plan({ fc: 4, ph: 7.4, ta: 80 });
+    expect(p.status).toBe('tweak');
+    expect(p.testedStatus).toBe('clear');
+  });
+
+  it('still flags a tested reading that is out of range without a dose step', () => {
+    // pH high but no alkalinity, so no acid step is given
+    const p = plan({ fc: 4, ph: 7.9 });
+    expect(p.steps).toEqual([]);
+    expect(p.testedStatus).toBe('tweak');
+  });
+
+  it('matches status when everything was tested', () => {
+    expect(plan(IDEAL).testedStatus).toBe('clear');
+    expect(plan({ ...IDEAL, fc: 1 }).testedStatus).toBe('act');
+    expect(plan({ ...IDEAL, ta: 180 }).testedStatus).toBe('tweak');
+  });
+});

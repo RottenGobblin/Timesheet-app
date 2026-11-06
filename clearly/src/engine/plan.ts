@@ -29,7 +29,7 @@ import {
   stabiliserGrams,
 } from './doses';
 import { toAmount } from './rounding';
-import { getTargets } from './targets';
+import { classify, getTargets } from './targets';
 import type {
   DosePlan,
   DoseStep,
@@ -58,7 +58,7 @@ export function buildDosePlan(profile: PoolProfile, readings: Readings): DosePla
   const targets = getTargets(profile, readings.cya);
 
   if (errors.length > 0) {
-    return { status: 'tweak', steps: [], warnings: [], missing, errors, targets };
+    return { status: 'tweak', testedStatus: 'tweak', steps: [], warnings: [], missing, errors, targets };
   }
 
   const V = profile.volumeLitres;
@@ -341,7 +341,30 @@ function finish(
   targets: Targets,
   readings: Readings,
 ): DosePlan {
-  return { status: statusFor(readings, targets, steps, warnings, missing), steps, warnings, missing, errors, targets };
+  return {
+    status: statusFor(readings, targets, steps, warnings, missing),
+    testedStatus: testedStatusFor(readings, targets, steps, warnings),
+    steps,
+    warnings,
+    missing,
+    errors,
+    targets,
+  };
+}
+
+/**
+ * Status judged only on what was tested: a skipped reading doesn't count against it,
+ * but any tested reading outside its range does, even if it has no dose step (for
+ * example pH out of range with alkalinity untested).
+ */
+function testedStatusFor(readings: Readings, targets: Targets, steps: DoseStep[], warnings: Warning[]): WaterStatus {
+  const base = statusFor(readings, targets, steps, warnings, []);
+  if (base !== 'clear') return base;
+  const outOfRange = ALL_READINGS.some((k) => {
+    const v = readings[k];
+    return v !== undefined && classify(v, targets[k]) !== 'ideal';
+  });
+  return outOfRange ? 'tweak' : 'clear';
 }
 
 function statusFor(
