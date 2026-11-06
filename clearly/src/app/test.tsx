@@ -33,6 +33,9 @@ export default function TestScreen() {
     else router.replace('/');
   }, []);
 
+  // Swap the Test screen for the plan, so Back from the plan goes Home.
+  const showPlan = useCallback(() => router.replace('/plan'), []);
+
   if (poolLoading || testsLoading) return null;
   if (!pool || !targets) return <Redirect href="/pool" />;
 
@@ -115,7 +118,7 @@ export default function TestScreen() {
           <PillButton label="Save test" onPress={onSave} disabled={entered === 0 || saving} />
         </View>
       </KeyboardAvoidingView>
-      {rippling ? <Ripple onDone={leave} /> : null}
+      {rippling ? <Ripple onDone={showPlan} /> : null}
     </SafeAreaView>
   );
 }

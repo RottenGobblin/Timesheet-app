@@ -54,12 +54,11 @@ export default function Home() {
                 );
               })}
             </View>
-            {plan.steps.length > 0 ? (
-              <Text style={styles.sub}>
-                {plan.steps.length} {plan.steps.length === 1 ? 'step' : 'steps'} in your dose plan. The plan screen is
-                coming next.
-              </Text>
-            ) : null}
+            <PillButton
+              label={plan.steps.length > 0 ? 'See your plan' : 'See details'}
+              variant="secondary"
+              onPress={() => router.push('/plan')}
+            />
           </Card>
         ) : (
           <Card title="No tests yet">

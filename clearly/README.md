@@ -4,7 +4,7 @@ Pool care app for Australian home pool owners. Test your water, get exact doses,
 
 Built with Expo (SDK 58), React Native, TypeScript and Expo Router.
 
-> **Status:** dosing engine, local storage, the pool profile and the Test screen are done. The dose plan screen, history, the full Home card and reminders come next.
+> **Status:** dosing engine, local storage, the pool profile, the Test screen and the Plan screen (with dose follow-up reminders) are done. History, Settings, the full Home card and the scheduled test reminders come next.
 
 ## Setup
 
@@ -39,7 +39,8 @@ npm run check      # all three
 
 ```
 src/
-  app/         Expo Router routes: index (interim Home), pool (pool profile), test (enter a test)
+  app/         Expo Router routes: index (interim Home), pool, test, plan
+  notifications/  Local notification wrapper (no-op on web or without permission)
   components/  Shared UI: pill button, segmented control, stepper, number field, card
   engine/      Dosing engine: pure TypeScript, no React or Expo imports
   lib/         Pure helpers: volume calculator, number parsing, pool form logic
@@ -71,6 +72,24 @@ The pool screen sets volume, sanitiser (liquid, granular or salt), indoor or out
 - A low / ideal / high bar shows where each value sits, with a short line underneath. The chlorine bar moves with the stabiliser reading. Lime is ideal, coral is adjust, and deep red is kept for act-now and safety cases (FC above 10, very low FC, pH below 7.0 or above 8.0), which use plain wording.
 - Optional notes, a "Scan strip" placeholder marked coming soon, and a quick ripple on save.
 - The interim Home shows the latest result (Crystal clear / Needs a tweak / Act now) and the readings.
+
+## Plan screen
+
+- Opens straight after saving a test (and from Home). Shows the status, any warnings (safety ones in red), then the steps in order.
+- Each step has the product, the rounded amount, why, how, any side effects on other readings, and the wait before the next step.
+- Steps are ticked off in order. After a step with a wait, the next one shows "Ready at 3:00 pm (6 h to go)" and its tick box unlocks when the wait is over. Only the most recent tick can be undone.
+- Chlorine shows a "best done this evening" hint before 5 pm.
+- Progress is saved, so closing the app mid-plan is fine. A new test starts a fresh plan.
+- When everything is ticked: a small splash and "Clearly sorted", with when to retest.
+
+### Dose follow-up reminders
+
+Ticking a step that has a wait schedules a local notification for when it ends, e.g. "4 hours are up, ready for the chlorine?". Rules:
+
+- Chlorine follow-ups move to 6 pm if the wait ends earlier in the day.
+- Nothing fires in quiet hours (9 pm to 7 am for now; adjustable once Settings is built). A reminder that would land then moves to 7 am.
+- Undoing a tick, finishing the plan or starting a new test cancels the pending reminder.
+- Permission is only asked the first time a reminder is needed. Notifications don't run on web.
 
 ## Dosing engine
 

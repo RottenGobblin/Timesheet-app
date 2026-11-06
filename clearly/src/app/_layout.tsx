@@ -5,9 +5,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { configureNotifications } from '../notifications';
 import { PoolProvider } from '../state/PoolProvider';
 import { TestsProvider } from '../state/TestsProvider';
 import { colours } from '../theme';
+
+configureNotifications();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({

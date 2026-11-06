@@ -3,6 +3,7 @@ import type { KeyValueStore } from './kv';
 export const STORAGE_KEYS = {
   pool: 'clearly/pool',
   tests: 'clearly/tests',
+  planProgress: 'clearly/plan-progress',
 } as const;
 
 /**
